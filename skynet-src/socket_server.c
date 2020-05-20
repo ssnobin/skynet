@@ -1211,14 +1211,17 @@ ctrl_cmd(struct socket_server *ss, struct socket_message *result) {
 	// ctrl command only exist in local fd, so don't worry about endian.
 	switch (type) {
 	case 'S':
+		printf("start_socket asdf\n");
 		return start_socket(ss,(struct request_start *)buffer, result);
 	case 'B':
 		return bind_socket(ss,(struct request_bind *)buffer, result);
 	case 'L':
+		printf("listen_socket asdf\n");
 		return listen_socket(ss,(struct request_listen *)buffer, result);
 	case 'K':
 		return close_socket(ss,(struct request_close *)buffer, result);
 	case 'O':
+		printf("open_socket asdf\n");
 		return open_socket(ss, (struct request_open *)buffer, result);
 	case 'X':
 		result->opaque = 0;
@@ -1517,6 +1520,7 @@ socket_server_poll(struct socket_server *ss, struct socket_message * result, int
 		case SOCKET_TYPE_CONNECTING:
 			return report_connect(ss, s, &l, result);
 		case SOCKET_TYPE_LISTEN: {
+			printf("SOCKET_TYPE_LISTEN and accept\n");
 			int ok = report_accept(ss, s, result);
 			if (ok > 0) {
 				return SOCKET_ACCEPT;
