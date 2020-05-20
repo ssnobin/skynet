@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 static bool 
 sp_invalid(int efd) {
@@ -30,6 +31,7 @@ sp_add(int efd, int sock, void *ud) {
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
 	ev.data.ptr = ud;
+	printf("sp_add %d\n", sock);
 	if (epoll_ctl(efd, EPOLL_CTL_ADD, sock, &ev) == -1) {
 		return 1;
 	}
@@ -46,6 +48,7 @@ sp_write(int efd, int sock, void *ud, bool enable) {
 	struct epoll_event ev;
 	ev.events = EPOLLIN | (enable ? EPOLLOUT : 0);
 	ev.data.ptr = ud;
+	printf("sp_write %d\n", sock);
 	epoll_ctl(efd, EPOLL_CTL_MOD, sock, &ev);
 }
 

@@ -1518,6 +1518,7 @@ socket_server_poll(struct socket_server *ss, struct socket_message * result, int
 		socket_lock_init(s, &l);
 		switch (s->type) {
 		case SOCKET_TYPE_CONNECTING:
+			printf("SOCKET_TYPE_CONNECTING and connect\n");
 			return report_connect(ss, s, &l, result);
 		case SOCKET_TYPE_LISTEN: {
 			printf("SOCKET_TYPE_LISTEN and accept\n");

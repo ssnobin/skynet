@@ -36,7 +36,7 @@ _poll(void * ud) {
             break;
         case SOCKET_ACCEPT:
             printf("accept(%lu) [id=%d %s] from [%d]\n",result.opaque, result.ud, result.data, result.id);
-            socket_server_start(ss,202,result.ud);
+            socket_server_start(ss,200,result.ud);
             break;
         }
     }
@@ -53,15 +53,15 @@ test(struct socket_server *ss) {
     */
     int l = socket_server_listen(ss,200,"127.0.0.1",8888,32);       // 使用 127.0.0.1:8888 开启TCP监听
     printf("listening %d\n",l);
-    socket_server_start(ss,201,l);                      // 让epoll监听该TCP
+    socket_server_start(ss,200,l);                      // 让epoll监听该TCP
     //int b = socket_server_bind(ss,300,1);                   // 让epoll监听标准输出
     //printf("binding stdin %d\n",b);
     //int i;
  
-    // printf("client_socket\n");
-    // c = socket_server_connect(ss, 400, "127.0.0.1", 8888);          // 异步连接 127.0.0.1:8888
+    printf("client_socket\n");
+    c = socket_server_connect(ss, 400, "127.0.0.1", 8888);          // 异步连接 127.0.0.1:8888
     // //sleep(2); 
-    // printf("client_connected %d\n", c);
+    printf("client_connected %d\n", c);
     // char *data = (char *) malloc(sizeof(char) * 20);
     // //char *data[20];
     // memcpy(data, "hello world", 20);
