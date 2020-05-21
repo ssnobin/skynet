@@ -12,7 +12,7 @@
 int c;
 static void *
 _poll(void * ud) {
-    printf("_poll\n");
+    printf("test _poll\n");
     struct socket_server *ss = ud;
     struct socket_message result;
     for (;;) {
@@ -22,20 +22,20 @@ _poll(void * ud) {
         case SOCKET_EXIT:
             return NULL;
         case SOCKET_DATA:
-            printf("message(%lu) [id=%d] size=%d data= %s\n",result.opaque,result.id, result.ud, result.data);
+            printf("test message(%lu) [id=%d] size=%d data= %s\n",result.opaque,result.id, result.ud, result.data);
             free(result.data);
             break;
         case SOCKET_CLOSE:
-            printf("close(%lu) [id=%d]\n",result.opaque,result.id);
+            printf("test close(%lu) [id=%d]\n",result.opaque,result.id);
             break;
         case SOCKET_OPEN:
-            printf("open(%lu) [id=%d] %s\n",result.opaque,result.id,result.data);
+            printf("test open(%lu) [id=%d] %s\n",result.opaque,result.id,result.data);
             break;
         case SOCKET_ERR:
-            printf("error(%lu) [id=%d]\n",result.opaque,result.id);
+            printf("test error(%lu) [id=%d]\n",result.opaque,result.id);
             break;
         case SOCKET_ACCEPT:
-            printf("accept(%lu) [id=%d %s] from [%d]\n",result.opaque, result.ud, result.data, result.id);
+            printf("test accept(%lu) [id=%d %s] from [%d]\n",result.opaque, result.ud, result.data, result.id);
             socket_server_start(ss,200,result.ud);
             break;
         }
@@ -52,28 +52,30 @@ test(struct socket_server *ss) {
     printf("connecting %d\n",c);
     */
     int l = socket_server_listen(ss,200,"127.0.0.1",8888,32);       // 使用 127.0.0.1:8888 开启TCP监听
-    printf("listening %d\n",l);
+    printf("test listening %d\n",l);
     socket_server_start(ss,200,l);                      // 让epoll监听该TCP
     //int b = socket_server_bind(ss,300,1);                   // 让epoll监听标准输出
     //printf("binding stdin %d\n",b);
     //int i;
  
-    printf("client_socket\n");
+    printf("test client_socket\n");
     c = socket_server_connect(ss, 400, "127.0.0.1", 8888);          // 异步连接 127.0.0.1:8888
-    // //sleep(2); 
-    printf("client_connected %d\n", c);
-    // char *data = (char *) malloc(sizeof(char) * 20);
+    //sleep(10);//马上发
+    printf("test client_connected %d\n", c);
+    char *data = (char *) malloc(sizeof(char) * 20);
     // //char *data[20];
-    // memcpy(data, "hello world", 20);
-    // struct socket_sendbuffer buf;
+    memcpy(data, "hello world", 20);
+    struct socket_sendbuffer buf;
 
-    // buf.id = c;
-    // buf.type = SOCKET_BUFFER_RAWPOINTER;
-    // buf.buffer = data;
-    // buf.sz = strlen(data);
+
+    buf.id = c;
+    buf.type = SOCKET_BUFFER_RAWPOINTER;
+    buf.buffer = data;
+    buf.sz = strlen(data);
     // //socket_server_send(ss, buf, data, strlen(data));              // 发送数据
-    // printf("send\n");
-    // socket_server_send(ss, &buf);
+    printf("test send\n");
+    socket_server_send(ss, &buf);
+    printf("test after_send\n");
     /*
     for (i=0;i<100;i++) {
         socket_server_connect(ss, 400+i, "127.0.0.1", 8888);

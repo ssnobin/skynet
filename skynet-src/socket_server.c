@@ -1231,6 +1231,7 @@ ctrl_cmd(struct socket_server *ss, struct socket_message *result) {
 		return SOCKET_EXIT;
 	case 'D':
 	case 'P': {
+		printf("send_socket\n");
 		int priority = (type == 'D') ? PRIORITY_HIGH : PRIORITY_LOW;
 		struct request_send * request = (struct request_send *) buffer;
 		int ret = send_socket(ss, request, result, priority, NULL);
@@ -1538,6 +1539,7 @@ socket_server_poll(struct socket_server *ss, struct socket_message * result, int
 			if (e->read) {
 				int type;
 				if (s->protocol == PROTOCOL_TCP) {
+					printf("e->read and read tcp\n");
 					type = forward_message_tcp(ss, s, &l, result);
 				} else {
 					type = forward_message_udp(ss, s, &l, result);
@@ -1654,12 +1656,15 @@ socket_server_send(struct socket_server *ss, struct socket_sendbuffer *buf) {
 
 	if (can_direct_write(s,id) && socket_trylock(&l)) {
 		// may be we can send directly, double check
+		printf("socket_server_send g1\n");
 		if (can_direct_write(s,id)) {
 			// send directly
+			printf("socket_server_send g2\n");
 			struct send_object so;
 			send_object_init_from_sendbuffer(ss, &so, buf);
 			ssize_t n;
 			if (s->protocol == PROTOCOL_TCP) {
+				printf("socket_server_send g3\n");
 				n = write(s->fd, so.buffer, so.sz);
 			} else {
 				union sockaddr_all sa;
@@ -1679,10 +1684,12 @@ socket_server_send(struct socket_server *ss, struct socket_sendbuffer *buf) {
 			stat_write(ss,s,n);
 			if (n == so.sz) {
 				// write done
+				printf("socket_server_send g4\n");
 				socket_unlock(&l);
 				so.free_func((void *)buf->buffer);
 				return 0;
 			}
+			printf("socket_server_send send_failed\n");
 			// write failed, put buffer into s->dw_* , and let socket thread send it. see send_buffer()
 			s->dw_buffer = clone_buffer(buf, &s->dw_size);
 			s->dw_offset = n;
@@ -1694,7 +1701,7 @@ socket_server_send(struct socket_server *ss, struct socket_sendbuffer *buf) {
 		}
 		socket_unlock(&l);
 	}
-
+	printf("inc_sending_ref\n");
 	inc_sending_ref(s, id);
 
 	struct request_package request;
@@ -1708,6 +1715,7 @@ socket_server_send(struct socket_server *ss, struct socket_sendbuffer *buf) {
 // return -1 when error, 0 when success
 int 
 socket_server_send_lowpriority(struct socket_server *ss, struct socket_sendbuffer *buf) {
+	printf("socket_server_send_lowpriority\n");
 	int id = buf->id;
 
 	struct socket * s = &ss->slot[HASH_ID(id)];
