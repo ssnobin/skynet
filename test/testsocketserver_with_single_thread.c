@@ -25,6 +25,21 @@ static void * client_send(struct socket_server * ss) {
     printf("test after_send\n");
 }
 
+static void * server_send(struct socket_server * ss, int id) {
+    char *data = (char *) malloc(sizeof(char) * 20);
+    // //char *data[20];
+    memcpy(data, "hello world client", 20);
+    struct socket_sendbuffer buf;
+    buf.id = id;
+    buf.type = SOCKET_BUFFER_RAWPOINTER;
+    buf.buffer = data;
+    buf.sz = strlen(data);
+    // //socket_server_send(ss, buf, data, strlen(data));              // 发送数据
+    printf("test server_send\n");
+    socket_server_send(ss, &buf);
+    printf("test after_server_send\n");
+}
+
 static void * continue_send(void * ud){
     struct socket_server * ss = ud;
     for(;;){
@@ -54,8 +69,9 @@ _poll(void * ud) {
             case SOCKET_OPEN:
                 printf("test open(%lu) [id=%d] %s\n",result.opaque,result.id,result.data);
                 if (result.id==c) {
-                    pthread_t pid;
-                    pthread_create(&pid, NULL, continue_send, ss);
+                    //pthread_t pid;
+                    //pthread_create(&pid, NULL, continue_send, ss);
+                    client_send(ss);
                 }
                 break;
             case SOCKET_ERR:
@@ -64,6 +80,7 @@ _poll(void * ud) {
             case SOCKET_ACCEPT:
                 printf("test accept(%lu) [id=%d %s] from [%d]\n",result.opaque, result.ud, result.data, result.id);
                 socket_server_start(ss,200,result.ud);
+                server_send(ss, result.ud);
                 break;
         }
         printf("ggg\n");
